@@ -27,11 +27,72 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef __MSP430FR5994__
+#if defined(__PICO_SDK__)
+
+#include "pico/stdlib.h"
+#include "pico/binary_info.h"
+#include "hardware/spi.h"
+
+#define PIN_SCK     2
+#define PIN_MOSI    3
+#define PIN_MISO    4
+#define PIN_CS      5
+
+#define SPI_PORT    spi0
+#define READ_BIT    0x80
+
+#define PMW3360_delayMicroseconds(x)    (sleep_us(x))
+
+static inline void PMW3360_SPI_init()
+{
+    // Configure chip select pin
+    gpio_init(PIN_CS);
+    gpio_set_dir(PIN_CS, GPIO_OUT);
+    gpio_put(PIN_CS, 1);
+
+    // Configure SPI for 1MHz
+    spi_init(SPI_PORT, 1000000);
+    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
+}
+
+static inline void PMW3360_SPI_shutdown()
+{
+    // Deinitialize SPI
+    spi_deinit(SPI_PORT);
+}
+
+static inline void PMW3360_SPI_begin(void)
+{
+    // Set chip select pin low
+    gpio_put(PIN_CS, 0);
+    PMW3360_delayMicroseconds(1);
+}
+
+static inline void PMW3360_SPI_end(void)
+{
+    // Set chip select pin high
+    PMW3360_delayMicroseconds(1);
+    gpio_put(PIN_CS, 1);
+}
+
+static inline uint8_t PMW3360_SPI_readWrite(uint8_t data)
+{
+    uint8_t result;
+
+    // Simultaniously write and read a byte
+    spi_write_read_blocking(SPI_PORT, &data, &result, 1);
+
+    // Return receives data
+    return result;
+}
+
+#elif defined(__MSP430FR5994__)
 
 #include <msp430.h>
 
-#define PMW3360_delayMicroseconds(x)    (__delay_cycles(x<<3))
+#define PMW3360_delayMicroseconds(x)    (__delay_cycles(x<<3))  // MCLK @ 8MHz
 
 static inline void PMW3360_SPI_init()
 {
@@ -85,6 +146,6 @@ static inline uint8_t PMW3360_SPI_readWrite(uint8_t data)
     return data;
 }
 
-#endif //__MSP430FR5994__
+#endif
 
 #endif //PMW3360_PORT_H__

@@ -30,8 +30,10 @@
 #if defined(__PICO_SDK__)
 
 #include "pico/stdlib.h"
-#include "pico/binary_info.h"
 #include "hardware/spi.h"
+#include "hardware/resets.h"
+
+#define PMW3360_delayMicroseconds(x)    (sleep_us(x))
 
 #define PIN_SCK     2
 #define PIN_MOSI    3
@@ -39,9 +41,6 @@
 #define PIN_CS      5
 
 #define SPI_PORT    spi0
-#define READ_BIT    0x80
-
-#define PMW3360_delayMicroseconds(x)    (sleep_us(x))
 
 static inline void PMW3360_SPI_init()
 {
@@ -52,6 +51,7 @@ static inline void PMW3360_SPI_init()
 
     // Configure SPI for 1MHz
     spi_init(SPI_PORT, 1000000);
+    spi_set_format(SPI_PORT, 8, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);

@@ -55,6 +55,10 @@ static inline void PMW3360_SPI_init()
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
+
+    // Send dummy byte without chip selected to fix clock polarity
+    uint8_t data = 0;
+    spi_write_blocking(SPI_PORT, &data, 1);
 }
 
 static inline void PMW3360_SPI_shutdown()

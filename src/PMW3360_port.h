@@ -35,10 +35,10 @@
 
 #define PMW3360_delayMicroseconds(x)    (sleep_us(x))
 
-#define PIN_SCK     2
-#define PIN_MOSI    3
-#define PIN_MISO    4
-#define PIN_CS      5
+#define PIN_SCK     18
+#define PIN_MOSI    19
+#define PIN_MISO    20
+#define PIN_CS      21
 
 #define SPI_PORT    spi0
 
